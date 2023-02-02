@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include tubsan *.css
+recursive-include tubsan *.csv
+recursive-include tubsan *.html
+recursive-include tubsan *.ico
+recursive-include tubsan *.js
+recursive-include tubsan *.json
+recursive-include tubsan *.md
+recursive-include tubsan *.png
+recursive-include tubsan *.py
+recursive-include tubsan *.svg
+recursive-include tubsan *.txt
+recursive-exclude tubsan *.pyc
