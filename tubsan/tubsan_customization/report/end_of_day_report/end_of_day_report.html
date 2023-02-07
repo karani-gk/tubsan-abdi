@@ -1,0 +1,49 @@
+<div class="body">
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="text-left">
+                {{ "End of Day Report" }}
+            </h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h5>
+                Period Between: {{ filters.from }} and {{ filters.to }}
+            </h5>
+        </div>
+    </div>
+
+
+    <hr />
+
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered table-stripped">
+                <tr>
+                    <td><b>Total Sales:</b></td>
+                    <td>{%= format_currency(data[0].sales, currency="USD" ) %}</td>
+                </tr>
+
+                <tr>
+                    <td><b>Payments Received:</b></td>
+                    <td>{%= format_currency(data[0].payments, currency="USD" ) %}</td>
+                </tr>
+
+                <tr>
+                    {% var totalActivity = data[0].sales + data[0].payments %}
+                    <td><b>Total Activity:</b></td>
+                    <td>{%= format_currency(totalActivity, currency="USD" ) %}</td>
+                </tr>
+
+                <tr>
+                    <td><b>Available for Deposit:</b></td>
+                    <td>{%= format_currency(totalActivity - data[0].credits, currency="USD" ) %}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+</div>
