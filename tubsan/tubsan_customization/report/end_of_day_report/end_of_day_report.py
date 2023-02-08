@@ -13,6 +13,8 @@ def execute(filters=None):
 
 def get_data(filters):
     
+    from_date, to_date = filters.get('from'), filters.get('to')
+    
     conditions = "1=1"
     if(filters.get('customer_group')):conditions += f" AND c.customer_group='{filters.get('customer_group')}' "
     if(filters.get('territory')):conditions += f" AND c.territory='{filters.get('territory')}' "
@@ -23,7 +25,7 @@ def get_data(filters):
 			(
        			SELECT SUM(grand_total) 
    				FROM `tabSales Invoice` si
-				JOIN tabCustomer AS c ON c.name=si.customer WHERE {conditions}
+				JOIN tabCustomer AS c ON c.name=si.customer WHERE {conditions} AND (si.posting_date BETWEEN '{from_date}' AND '{to_date}')
        			AND si.status <> 'Draft' AND si.status <> 'Cancelled'
      		)
           		AS sales,
@@ -31,7 +33,7 @@ def get_data(filters):
             (
                 SELECT SUM(paid_amount) 
    				FROM `tabPayment Entry` pe
-       			JOIN tabCustomer AS c ON c.name=pe.party_name WHERE {conditions}
+       			JOIN tabCustomer AS c ON c.name=pe.party_name WHERE {conditions} AND (pe.posting_date BETWEEN '{from_date}' AND '{to_date}')
 				AND pe.status <> 'Draft' AND pe.status <> 'Cancelled'
        		) 
           		AS payments,
@@ -39,7 +41,7 @@ def get_data(filters):
    			(
           		SELECT SUM(outstanding_amount) 
    				FROM `tabSales Invoice` si 
-				JOIN tabCustomer AS c ON c.name=si.customer WHERE {conditions}
+				JOIN tabCustomer AS c ON c.name=si.customer WHERE {conditions} AND (si.posting_date BETWEEN '{from_date}' AND '{to_date}')
        			AND si.status <> 'Paid' AND si.status <> 'Draft' AND si.status <> 'Cancelled'
           	) 
           		AS credits
@@ -49,7 +51,9 @@ def get_data(filters):
         	tabCustomer AS c
 		ON 
   			c.name=si.customer
-		WHERE {conditions}
+		WHERE
+  			{conditions}
+		AND (si.posting_date BETWEEN '{from_date}' AND '{to_date}')
 		LIMIT 1
     """
     
