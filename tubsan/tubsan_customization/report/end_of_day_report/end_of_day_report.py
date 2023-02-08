@@ -2,7 +2,6 @@
 # For license information, please see license.txt
 
 import frappe
-from erpnext.accounts.utils import get_balance_on
 
 
 def execute(filters=None):
@@ -13,30 +12,44 @@ def execute(filters=None):
 
 
 def get_data(filters):
-    fetch_query = """
-		SELECT    
+    
+    conditions = "1=1"
+    if(filters.get('customer_group')):conditions += f" AND c.customer_group='{filters.get('customer_group')}' "
+    if(filters.get('territory')):conditions += f" AND c.territory='{filters.get('territory')}' "
+    
+    
+    fetch_query = f"""
+		SELECT
 			(
        			SELECT SUM(grand_total) 
    				FROM `tabSales Invoice` si
-       			WHERE si.status <> 'Draft' AND si.status <> 'Cancelled'
+				JOIN tabCustomer AS c ON c.name=si.customer WHERE {conditions}
+       			AND si.status <> 'Draft' AND si.status <> 'Cancelled'
      		)
           		AS sales,
             
             (
                 SELECT SUM(paid_amount) 
    				FROM `tabPayment Entry` pe
-				WHERE pe.status <> 'Draft' AND pe.status <> 'Cancelled'
+       			JOIN tabCustomer AS c ON c.name=pe.party_name WHERE {conditions}
+				AND pe.status <> 'Draft' AND pe.status <> 'Cancelled'
        		) 
           		AS payments,
       
    			(
           		SELECT SUM(outstanding_amount) 
    				FROM `tabSales Invoice` si 
-       			WHERE si.status <> 'Paid' AND si.status <> 'Draft' AND si.status <> 'Cancelled'
+				JOIN tabCustomer AS c ON c.name=si.customer WHERE {conditions}
+       			AND si.status <> 'Paid' AND si.status <> 'Draft' AND si.status <> 'Cancelled'
           	) 
           		AS credits
        	FROM 
         	`tabSales Invoice` AS si
+        JOIN 
+        	tabCustomer AS c
+		ON 
+  			c.name=si.customer
+		WHERE {conditions}
 		LIMIT 1
     """
     
@@ -47,19 +60,7 @@ def get_data(filters):
 
 def get_columns():
     return [
-		"Sales:Currency:165",
- 		"Payments:Currency:150",
-		"Credits:Currency:100"
+		"Total Sales:Currency:165",
+ 		"Payments Received:Currency:150",
+		"Unpaid Invoices:Currency:150"
 	]
-    
-    
-    
-def get_balances():
-    customers = frappe.db.get_all("Customer")
-    
-    total_balance = 0
-    for customer in customers:
-        balance =  get_balance_on(party_type="Customer", party=customer)
-        total_balance = total_balance + balance
-        
-        return total_balance
