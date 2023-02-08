@@ -5,10 +5,18 @@
 frappe.query_reports["End of Day Report"] = {
 	"filters": [
 		{
-			fieldname: "sales_invoice",
-			label: __("Sales Invoice"),
+			fieldname: "customer_group",
+			label: __("Customer Group"),
 			fieldtype: "Link",
-			options: "Sales Invoice",
+			options: "Customer Group",
+			width: 100,
+			reqd: 0
+		},
+		{
+			fieldname: "territory",
+			label: __("Territory"),
+			fieldtype: "Link",
+			options: "Territory",
 			width: 100,
 			reqd: 0
 		},
